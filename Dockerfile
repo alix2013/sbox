@@ -28,12 +28,24 @@ RUN mkdir /var/run/sshd
 RUN useradd -m -d /home/web web 
 RUN echo "web:passw0rd123!@#" | chpasswd  
 
+RUN  curl -k -L -o /bin/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-`dpkg --print-architecture` && \
+ chmod +x /bin/cloudflared
+
 COPY start.sh /start.sh 
 RUN chmod a+x /start.sh
 
+COPY authorized_keys /root/.ssh/authorized_keys
+RUN chmod 600 /root/.ssh/authorized_keys 
+COPY authorized_keys /home/web/.ssh/authorized_keys
 
+RUN chown -R web:web /home/web/.ssh
+RUN chmod 600 /home/web/.ssh/authorized_keys 
+
+EXPOSE 4200
 
 #CMD ["/usr/sbin/init"]
 #CMD ["/usr/bin/shellinaboxd", "-t", "-s", "/:LOGIN"]
 #CMD ["/start.sh"]
 CMD ["sh", "-c", "/start.sh"]
+
+
